@@ -15,7 +15,6 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "preLaunchTask": "CMake: build",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -30,13 +29,12 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/testbinary",
-            "args": ["--gtest_filter=SliceTest*"],
+            "args": [], // ["--gtest_filter=SliceTest*"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "preLaunchTask": "CMake: build",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
