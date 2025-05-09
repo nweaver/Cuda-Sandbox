@@ -35,17 +35,17 @@ Matrix<float> cudaTranspose(Matrix<float> &bin)
     float *cdest;
     size_t pitch;
     auto result = cudaMallocPitch(&csource,
-                                  &pitch, bin._size, bin._size);
+                                  &pitch, bin._size * sizeof(float), bin._size);
 checkResult(result);
 
-    result = cudaMemcpy2D(csource, pitch, (void *)bin._data, bin._size,
-                          bin._size, bin._size, cudaMemcpyHostToDevice);
+    result = cudaMemcpy2D(csource, pitch, (void *)bin._data, bin._size * sizeof(float),
+                          bin._size * sizeof(float), bin._size, cudaMemcpyHostToDevice);
                           checkResult(result);
 
     assert(result == cudaSuccess);
 
     result = cudaMallocPitch(&cdest,
-                             &pitch, bin._size, bin._size);
+                             &pitch, bin._size * sizeof(float), bin._size);
                              checkResult(result);
 
     assert(result == cudaSuccess);
@@ -53,12 +53,12 @@ checkResult(result);
     int block_size = 256;
     int grid_size = ((bin._size * bin._size + block_size) / block_size);
 
-    transpose<<<grid_size, block_size>>>(cdest, csource, bin._size, pitch);
+    transpose<<<grid_size, block_size>>>(cdest, csource, bin._size, pitch/sizeof(float));
 
     Matrix<float> d;
     d._data = (float *)malloc(sizeof(float) * bin._size * bin._size);
     d._size = bin._size;
-    result = cudaMemcpy2D(d._data, bin._size, cdest, pitch, bin._size, bin._size,
+    result = cudaMemcpy2D(d._data, bin._size * sizeof(float), cdest, pitch, bin._size * sizeof(float), bin._size,
                           cudaMemcpyDeviceToHost);
                           checkResult(result);
 
