@@ -41,7 +41,7 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 
-add_executable(testbinary basetest.cpp) 
+add_executable(testbinary basetest.cpp vector_add.cu) 
 target_link_libraries(
   testbinary
   GTest::gtest_main
