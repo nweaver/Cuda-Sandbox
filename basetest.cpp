@@ -8,4 +8,5 @@ TEST(SimpleTest, CanCallCudaCode)
 {
   EXPECT_TRUE(true);
   EXPECT_TRUE(cuda_call_test());
+  test_vector_add();
 }
