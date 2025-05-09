@@ -21,50 +21,55 @@ __global__ void transpose(float *out, float *in, size_t size, size_t pitch)
     }
 }
 
-void checkResult(cudaError_t error){
-    if (error != cudaSuccess){
-                std::cout << "CUDA error: " << cudaGetErrorName(error) << "\n";
+void checkResult(cudaError_t error)
+{
+    if (error != cudaSuccess)
+    {
+        std::cout << "CUDA error: " << cudaGetErrorName(error) << "\n";
 
         std::cout << "CUDA error: " << cudaGetErrorString(error) << "\n";
     }
 }
 
-Matrix<float> cudaTranspose(Matrix<float> &bin)
-{
+float *cudaTransposeInternal(Matrix<float> &bin, size_t &pitch) {
     float *csource;
     float *cdest;
-    size_t pitch;
     auto result = cudaMallocPitch(&csource,
                                   &pitch, bin._size * sizeof(float), bin._size);
-checkResult(result);
+    checkResult(result);
 
     result = cudaMemcpy2D(csource, pitch, (void *)bin._data, bin._size * sizeof(float),
                           bin._size * sizeof(float), bin._size, cudaMemcpyHostToDevice);
-                          checkResult(result);
+    checkResult(result);
 
     assert(result == cudaSuccess);
 
     result = cudaMallocPitch(&cdest,
                              &pitch, bin._size * sizeof(float), bin._size);
-                             checkResult(result);
+    checkResult(result);
 
     assert(result == cudaSuccess);
 
     int block_size = 256;
     int grid_size = ((bin._size * bin._size + block_size) / block_size);
 
-    transpose<<<grid_size, block_size>>>(cdest, csource, bin._size, pitch/sizeof(float));
+    transpose<<<grid_size, block_size>>>(cdest, csource, bin._size, pitch / sizeof(float));
+    cudaFree(csource);
+    assert(result == cudaSuccess);
+    return cdest;
+}
+
+
+Matrix<float> cudaTranspose(Matrix<float> &bin)
+{
+    size_t pitch;
+    float *cdest = cudaTransposeInternal(bin, pitch);
 
     Matrix<float> d;
     d._data = (float *)malloc(sizeof(float) * bin._size * bin._size);
     d._size = bin._size;
-    result = cudaMemcpy2D(d._data, bin._size * sizeof(float), cdest, pitch, bin._size * sizeof(float), bin._size,
+    auto result = cudaMemcpy2D(d._data, bin._size * sizeof(float), cdest, pitch, bin._size * sizeof(float), bin._size,
                           cudaMemcpyDeviceToHost);
-                          checkResult(result);
-
-    
-    assert(result == cudaSuccess);
-    result = cudaFree(csource);
     checkResult(result);
 
     assert(result == cudaSuccess);
