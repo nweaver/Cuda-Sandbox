@@ -5,6 +5,7 @@
 #include "parallel_utils.hpp"
 #include "matrix.hpp"
 #include "matrix_mul.h"
+#include <ranges>
 
 // Demonstrate some basic assertions.
 TEST(SimpleTest, CanCallCudaCode)
@@ -32,25 +33,32 @@ TEST(Performance, OpenMP)
   EXPECT_TRUE(seqd == paralleld);
 }
 
-TEST(Simple, Cuda){
+TEST(Simple, Cuda)
+{
   Matrix<float> a(2);
   Matrix<float> b(2);
-  a(0,0) = 4.0;
-  a(0,1) = 2.0;
-  a(1,0) = 0.0;
-  a(1,1) = 0.0;
+  a(0, 0) = 4.0;
+  a(0, 1) = 2.0;
+  a(1, 0) = 0.0;
+  a(1, 1) = 0.0;
 
-  b(0,0) = 1.0;
-  b(0,1) = 3.0;
-  b(1,0) = 0.0;
-  b(1,1) = 0.0;
-  auto d = a*b;
-  std::cout << d(0,0) << " " << d(0, 1) << "\n";
-  std::cout << d(1,0) << " " << d(1, 1) << "\n\n";
+  b(0, 0) = 1.0;
+  b(0, 1) = 3.0;
+  b(1, 0) = 0.0;
+  b(1, 1) = 0.0;
+
+  std::cout << a(0, 0) << " " << a(0, 1) << "\n";
+  std::cout << a(1, 0) << " " << a(1, 1) << "\n\n";
+
+  std::cout << b(0, 0) << " " << b(0, 1) << "\n";
+  std::cout << b(1, 0) << " " << b(1, 1) << "\n\n";
+
+  auto d = a * b;
+  std::cout << d(0, 0) << " " << d(0, 1) << "\n";
+  std::cout << d(1, 0) << " " << d(1, 1) << "\n\n";
   auto f = cudamul(a, b);
-  std::cout << f(0,0) << " " << f(0, 1) << "\n";
-  std::cout << f(1,0) << " " << f32addf128(1, 1) << "\n";
-
+  std::cout << f(0, 0) << " " << f(0, 1) << "\n";
+  std::cout << f(1, 0) << " " << f32addf128(1, 1) << "\n";
 }
 
 TEST(Performance, Cuda)
@@ -72,8 +80,14 @@ TEST(Performance, Cuda)
 
 TEST(Cuda, CudaTranspose)
 {
-  Matrix<float> in(4096, true);
-  auto ref = in.transpose();
-  auto cuda = cudaTranspose(in);
-  EXPECT_TRUE(ref == cuda);
+  auto tmp = 2;
+  for (auto i = 0; i < 10; ++i)
+  {
+    Matrix<float> in(tmp, true);
+    auto ref = in.transpose();
+    auto cuda = cudaTranspose(in);
+    std::cout << tmp << "\n";
+    EXPECT_TRUE(ref == cuda);
+    tmp = tmp * 2;
+  }
 }
