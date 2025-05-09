@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.31)
+set(CMAKE_CUDA_ARCHITECTURES 75)
+set(CMAKE_CUDA_COMPILER /usr/local/cuda-12.9/bin/nvcc)
+
+project(CudaTest CUDA)
+
+
+set(CMAKE_CUDA_STANDARD 20)
+
+add_executable(CudaTest main.cu)
+
+set_target_properties(CudaTest PROPERTIES
+        CUDA_SEPARABLE_COMPILATION ON)
