@@ -8,12 +8,14 @@
 #include <ranges>
 #include <omp.h>
 
+
 // Demonstrate some basic assertions.
 TEST(SimpleTest, CanCallCudaCode)
 {
   EXPECT_TRUE(true);
   EXPECT_TRUE(cuda_call_test());
   test_vector_add();
+  CudaDeviceInfo();
 }
 
 TEST(Performance, OpenMP)
@@ -29,7 +31,7 @@ TEST(Performance, OpenMP)
   parallelNuke();
   auto parallel = GetTiming([&]()
                             { paralleld = parallel_multiply4(a, b); });
-  std::cout << "Speedup = " << (((float) sequential) / ((float)parallel)) << "\n";
+  std::cout << "Speedup = " << (((float)sequential) / ((float)parallel)) << "\n";
   EXPECT_TRUE(seqd == paralleld);
 }
 
@@ -40,12 +42,23 @@ TEST(Performance, Cuda)
   Matrix<float> b(size, true);
   Matrix<float> paralleld;
   Matrix<float> cudad;
+  Matrix<float> cudasmallblock;
   parallelNuke();
   auto parallel = GetTiming([&]()
                             { paralleld = parallel_multiply4(a, b); });
   auto cuda = GetTiming([&]()
                         { cudad = cudamul(a, b); });
-  std::cout << "Speedup = " << (((float)parallel) / ((float)cuda)) << "\n";
+  auto cudasmall = GetTiming([&]()
+                             { cudad = cudamul_smallblock(a, b); });
+  auto cudacoalesce = GetTiming([&]()
+                                { cudad = cudamul_coalesce(a, b); });
+  auto cudacache = GetTiming([&]()
+                             { cudad = cudamul_cache(a, b); });
+
+  std::cout << "Speedup naive      = " << (((float)parallel) / ((float)cuda)) << "\n";
+  std::cout << "Speedup smallblock = " << (((float)parallel) / ((float)cudasmall)) << "\n";
+  std::cout << "Speedup coalesce   = " << (((float)parallel) / ((float)cudacoalesce)) << "\n";
+  std::cout << "Speedup cache      = " << (((float)parallel) / ((float)cudacache)) << "\n";
 
   EXPECT_TRUE(cudad == paralleld);
 }

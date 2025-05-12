@@ -8,6 +8,8 @@ project(CudaTest CUDA CXX)
 set(CMAKE_CUDA_STANDARD 20)
 set(CMAKE_CUDA_ARCHITECTURES 75 89)
 
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --ptxas-options=\"-v \"")
+
 set(DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 
 add_executable(CudaTest main.cu)
