@@ -2,7 +2,7 @@
 *.d
 
 # Binary
-hello
+hello testbinary
 
 # Emacs save files
 *~

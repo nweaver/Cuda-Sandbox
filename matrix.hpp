@@ -107,6 +107,17 @@ public:
         return ret;
     }
 
+    Matrix<T> ptranspose() {
+        Matrix<T> ret(_size);
+#pragma omp parallel for
+        for(size_t i = 0; i < _size; ++i) {
+            for(size_t j = 0; j < _size; ++j){
+                ret(i,j) = (*this)(j, i);
+            }
+        }
+        return ret;
+    }
+
     Matrix<T> operator*(Matrix &b) noexcept {
         assert(_size == b._size);
         Matrix<T> dest(_size);

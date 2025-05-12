@@ -61,8 +61,6 @@ bool test_vector_add()
         if (fabs(out[i] - a[i] - b[i]) < MAX_ERR)
             ok = false;
     }
-    printf("out[0] = %f\n", out[0]);
-    printf("PASSED\n");
 
     // Deallocate device memory
     cudaFree(d_a);
