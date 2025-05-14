@@ -123,9 +123,9 @@ TEST(Image, Simple)
     {
       for (auto yi = 0; yi < 64; ++yi)
       {
-        data2[xi * 3 + yi * 3 * 64 ] = data[xi * 32 * 3 + yi * 2048 * 3];
-        data2[xi * 3 + yi * 3 * 64 + 1] = data[xi * 32 * 3 + yi * 2048 * 3 + 1];
-        data2[xi * 3 + yi * 3 * 64 + 2] = data[xi * 32 * 3 + yi * 2048 * 3 + 2];
+        data2[xi * 3 + yi * 3 * 64 ] = data[xi * 32 * 3 + yi * 2048 * 3 * 32];
+        data2[xi * 3 + yi * 3 * 64 + 1] = data[xi * 32 * 3 + yi * 2048 * 3 * 32 + 1];
+        data2[xi * 3 + yi * 3 * 64 + 2] = data[xi * 32 * 3 + yi * 2048 * 3 * 32 + 2];
       }
     }
       // Stride is separating between rows to keep things aligned.
