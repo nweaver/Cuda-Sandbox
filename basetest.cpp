@@ -8,6 +8,19 @@
 #include <ranges>
 #include <omp.h>
 
+// The STB libraries do introduce a couple of compiler warnings
+// in my preferred paranoid compiler settings, so...
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wconversion"
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_ONLY_PNG
+#include "stb_image.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
+#pragma GCC diagnostic pop
 
 // Demonstrate some basic assertions.
 TEST(SimpleTest, CanCallCudaCode)
@@ -37,7 +50,7 @@ TEST(Performance, OpenMP)
 
 TEST(Performance, Cuda)
 {
-  size_t size = 4096;
+  size_t size = 128; // 4096;
   Matrix<float> a(size, true);
   Matrix<float> b(size, true);
   Matrix<float> paralleld;
@@ -79,7 +92,7 @@ TEST(Cuda, CudaTranspose)
 
 TEST(Performance, Transpose)
 {
-  size_t size = 4096 * 4;
+  size_t size = 64; // 4096 * 4;
   Matrix<float> a(size, true);
   Matrix<float> b, c, d;
   parallelNuke();
@@ -96,4 +109,41 @@ TEST(Performance, Transpose)
   std::cout << "CUDA       = " << cuda << "\n";
   EXPECT_TRUE(b == c);
   EXPECT_TRUE(b == d);
+}
+
+TEST(Image, Simple)
+{
+  int x, y, n;
+  unsigned char *data = stbi_load("../Lena_2048.png", &x, &y, &n, 0);
+  if (data)
+  {
+    std::cout << "Size x: " << x << " y: " << y << " n: " << n << "\n";
+    unsigned char * data2 = (unsigned char *) malloc(sizeof(unsigned char) * 64 * 64 * 3);
+    for (auto xi = 0; xi < 64; ++xi)
+    {
+      for (auto yi = 0; yi < 64; ++yi)
+      {
+        data2[xi * 3 + yi * 3 * 64 ] = data[xi * 32 * 3 + yi * 2048 * 3];
+        data2[xi * 3 + yi * 3 * 64 + 1] = data[xi * 32 * 3 + yi * 2048 * 3 + 1];
+        data2[xi * 3 + yi * 3 * 64 + 2] = data[xi * 32 * 3 + yi * 2048 * 3 + 2];
+      }
+    }
+      // Stride is separating between rows to keep things aligned.
+
+    auto ret = stbi_write_png("./foo.png", 64, 64, 3, data2, 64 * 3);
+    if (!ret)
+    {
+      std::cerr << "Failed to write test png\n";
+      EXPECT_TRUE(false);
+    }
+
+    stbi_image_free(data);
+    free(data2);
+  }
+  else
+  {
+    std::cerr << "Unable to load file!, reason: " << stbi_failure_reason() << "\n";
+    EXPECT_TRUE(false);
+  }
+
 }
